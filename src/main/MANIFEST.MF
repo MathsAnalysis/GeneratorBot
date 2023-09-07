@@ -1,0 +1,3 @@
+Main-Class: it.mathanalisys.generator.GeneratorMain
+Created-By: "MathAnalisys"
+Manifest-Version: 1.0
