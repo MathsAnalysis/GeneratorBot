@@ -14,16 +14,9 @@ import java.util.List;
 @UtilityClass
 public class Utility {
 
-    public static boolean isUser(String id){
-        List<User> users = Generator.get().getJda().getUsers();
-        for (User user : users){
-            if (!user.getId().equalsIgnoreCase(id)){
-                return false;
-            }
-        }
-        return true;
+    public static boolean isUser(User user, String id){
+        return user.getId().equals(id);
     }
-
 
     public static boolean hasRoleOrHigher(Member member, Role targetRole) {
         List<Role> memberRoles = member.getRoles();

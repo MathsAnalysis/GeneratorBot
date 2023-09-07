@@ -6,22 +6,20 @@ import it.mathanalisys.generator.commands.reclaim.ReclaimBasicPlusAccountCommand
 import it.mathanalisys.generator.commands.reclaim.ReclaimBasicPlusPlusAccountCommand;
 import it.mathanalisys.generator.commands.StockAccountCommand;
 import it.mathanalisys.generator.listener.*;
+import it.mathanalisys.generator.utils.CommandDeletion;
 import it.mathanalisys.generator.utils.Utility;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
-import org.bson.Document;
 
-import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -33,6 +31,11 @@ public class Generator {
     @Getter(AccessLevel.PUBLIC) private DatabaseManager databaseManager;
 
     @Getter private final ScheduledExecutorService remove_cooldown_thread = Executors.newScheduledThreadPool(1);
+
+
+    public static Guild GUILD_ID;
+
+    protected CommandDeletion commandDeletion;
 
 
 
@@ -49,6 +52,13 @@ public class Generator {
     private void loadManager(){
         databaseManager = new DatabaseManager();
         remove_cooldown_thread.scheduleAtFixedRate(Utility::removeExpiredCooldowns, 1, 15, TimeUnit.MINUTES);
+
+        GUILD_ID = jda.getGuildById("1146820473892638791");
+
+        this.commandDeletion = new CommandDeletion(jda);
+        this.commandDeletion.deleteCommand("clear");
+        this.commandDeletion.deleteCommand("clearchat");
+
     }
 
     @SneakyThrows
@@ -56,34 +66,35 @@ public class Generator {
         jda = JDABuilder.createDefault(TOKEN)
                 .enableIntents(GatewayIntent.MESSAGE_CONTENT)
                 .setChunkingFilter(ChunkingFilter.ALL)
+                .setStatus(OnlineStatus.IDLE)
                 .setAutoReconnect(true)
                 .setActivity(Activity.of(Activity.ActivityType.PLAYING, "Generating Account"))
-                .build();
-        jda.awaitReady();
+                .build()
+                .awaitReady();
     }
 
     private void loadListener(){
         jda.addEventListener(new ShutdownListener());
+
+        // System for moderation
         jda.addEventListener(new StockAccountCommand());
 
-        // TODO: System for account
+        // System for account
         jda.addEventListener(new ChannelMessageListener());
         jda.addEventListener(new ChannelMessagePlusListener());
         jda.addEventListener(new ChannelMessagePlusPlusListener());
         //end
 
-        // TODO: Sytstem for claim account
+        // Sytstem for claim account
         jda.addEventListener(new ReclaimBasicAccountCommand());
         jda.addEventListener(new ReclaimBasicPlusAccountCommand());
         jda.addEventListener(new ReclaimBasicPlusPlusAccountCommand());
         //end
 
 
-        Guild guild = jda.getGuildById("1146820473892638791");
-        if (guild == null)return;
+
+        if (GUILD_ID == null)return;
         jda.upsertCommand("stock", "shows the availability of everything").queue();
-
-
     }
 
     public static Generator get() {
