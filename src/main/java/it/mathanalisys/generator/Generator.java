@@ -66,7 +66,7 @@ public class Generator {
         jda = JDABuilder.createDefault(TOKEN)
                 .enableIntents(GatewayIntent.MESSAGE_CONTENT)
                 .setChunkingFilter(ChunkingFilter.ALL)
-                .setStatus(OnlineStatus.IDLE)
+                .setStatus(OnlineStatus.ONLINE)
                 .setAutoReconnect(true)
                 .setActivity(Activity.of(Activity.ActivityType.PLAYING, "Generating Account"))
                 .build()
