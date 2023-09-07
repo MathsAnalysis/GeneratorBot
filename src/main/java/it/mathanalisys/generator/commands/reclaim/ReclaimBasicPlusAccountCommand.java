@@ -1,4 +1,4 @@
-package it.mathanalisys.generator.commands;
+package it.mathanalisys.generator.commands.reclaim;
 
 import it.mathanalisys.generator.Generator;
 import it.mathanalisys.generator.utils.DateUtils;
@@ -14,10 +14,11 @@ import org.bson.Document;
 import java.awt.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-public class ReclaimBasicAccountCommand extends ListenerAdapter {
+
+public class ReclaimBasicPlusAccountCommand extends ListenerAdapter {
+
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
@@ -27,17 +28,19 @@ public class ReclaimBasicAccountCommand extends ListenerAdapter {
 
         if (member == null) return;
 
+
+
         if (user.isBot()) {
             return;
         }
 
-        if (event.getChannel().asTextChannel().getId().equals("1149229611159400448")){
-
+        if (event.getChannel().asTextChannel().getId().equals("1149229675692965898")) {
             if (message.equalsIgnoreCase("!gen")) {
-                Document document = Generator.get().getDatabaseManager().getAndRemoveRandomAccount();
-                Role targetRole = event.getGuild().getRoleById("1149189484399833179");
+                Document document = Generator.get().getDatabaseManager().getAndRemoveAccountPlus();
 
-                if (!Generator.get().hasRoleOrHigher(member, targetRole)) {
+                Role targetRole = event.getGuild().getRoleById("1149189658761240599");
+
+                if (Generator.get().hasRoleOrHigher(member, targetRole)) {
                     user.openPrivateChannel().queue(privateChannel -> {
                         EmbedBuilder builder = new EmbedBuilder();
                         builder.setColor(Color.red);
@@ -48,11 +51,13 @@ public class ReclaimBasicAccountCommand extends ListenerAdapter {
                             }
                         });
                     });
+
+                    event.getMessage().delete().queueAfter(10, TimeUnit.SECONDS);
                     return;
                 }
 
-                if (Generator.get().getDatabaseManager().isInCooldown(user.getId(), "basic_cooldown")) {
-                    int remainingSeconds = Generator.get().getDatabaseManager().getRemainingCooldown(user.getId(), "basic_cooldown");
+                if (Generator.get().getDatabaseManager().isInCooldown(user.getId(), "basic_plus_cooldown")) {
+                    int remainingSeconds = Generator.get().getDatabaseManager().getRemainingCooldown(user.getId(), "basic_plus_cooldown");
                     event.getChannel().sendMessage("You must wait " + DateUtils.niceTime(remainingSeconds) + " before using this command again.").queue();
                     return;
                 }
@@ -70,8 +75,8 @@ public class ReclaimBasicAccountCommand extends ListenerAdapter {
                     builder.appendDescription("Username: " + document.getString("username") + "\n");
                     builder.appendDescription("Password: " + document.getString("password") + "\n");
                     builder.appendDescription("\n");
-                    builder.appendDescription("Cooldown: 15 minutes" + "\n");
-                    builder.appendDescription("Type: Basic");
+                    builder.appendDescription("Cooldown: 1 hour" + "\n");
+                    builder.appendDescription("Type: Basic+");
                     builder.appendDescription("\n");
                     builder.appendDescription("\n");
                     builder.setFooter(new SimpleDateFormat("MMMM dd, yyyy hh:mm:ss a").format(new Date()), null);
@@ -83,8 +88,8 @@ public class ReclaimBasicAccountCommand extends ListenerAdapter {
                     });
                 });
 
-                event.getMessage().delete().queueAfter(5, TimeUnit.SECONDS);
-                Generator.get().getDatabaseManager().addCooldown(user.getId(), 900, "basic_cooldown");
+                event.getMessage().delete().queueAfter(10, TimeUnit.SECONDS);
+                Generator.get().getDatabaseManager().addCooldown(user.getId(), 3600,  user.getName(), "basic_plus_cooldown");
             }
         }
     }

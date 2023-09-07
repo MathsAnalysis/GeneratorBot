@@ -82,16 +82,15 @@ public class DatabaseManager {
 
     // TODO: 07/09/2023 System to add cooldowns to users
 
-    // Metodo per aggiungere un cooldown
-    public void addCooldown(String userId, int durationInSeconds, String type) {
+    public void addCooldown(String userId, int durationInSeconds, String name, String type) {
         long expiryTimestamp = System.currentTimeMillis() + (durationInSeconds * 1000L);
         Document doc = new Document("userId", userId)
                 .append("expiryTimestamp", expiryTimestamp)
+                .append("name", name)
                 .append("type", type);
         cooldowns.insertOne(doc);
     }
 
-    // Metodo per controllare se un utente è in cooldown
     public boolean isInCooldown(String userId, String type) {
         Document query = new Document("userId", userId).append("type", type);
         Document cooldownEntry = cooldowns.find(query).first();
@@ -106,7 +105,6 @@ public class DatabaseManager {
         return false;
     }
 
-    // Metodo per ottenere il tempo rimanente del cooldown
     public int getRemainingCooldown(String userId, String type) {
         Document query = new Document("userId", userId).append("type", type);
         Document cooldownEntry = cooldowns.find(query).first();

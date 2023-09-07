@@ -11,7 +11,6 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -27,7 +26,7 @@ public class ChannelMessagePlusPlusListener extends ListenerAdapter {
         if (event.getChannel().getId().equals("1149215591232720946") && !event.getMessage().getAttachments().isEmpty()) {
 
             Role role = event.getGuild().getRoleById("1149214454844772372");
-            if (!Generator.get().hasRoleOrHigher(member, role)) return;
+            if (Generator.get().hasRoleOrHigher(member, role)) return;
 
             Generator.get().getDatabaseManager().getFilesPlusPlus().drop();
 

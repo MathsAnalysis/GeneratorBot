@@ -1,27 +1,26 @@
 package it.mathanalisys.generator;
 
 import it.mathanalisys.generator.backend.DatabaseManager;
-import it.mathanalisys.generator.commands.ReclaimBasicAccountCommand;
-import it.mathanalisys.generator.commands.ReclaimBasicPlusAccountCommand;
-import it.mathanalisys.generator.commands.ReclaimBasicPlusPlusAccountCommand;
-import it.mathanalisys.generator.listener.ChannelMessageListener;
-import it.mathanalisys.generator.listener.ChannelMessagePlusListener;
-import it.mathanalisys.generator.listener.ChannelMessagePlusPlusListener;
-import it.mathanalisys.generator.listener.ShutdownListener;
+import it.mathanalisys.generator.commands.reclaim.ReclaimBasicAccountCommand;
+import it.mathanalisys.generator.commands.reclaim.ReclaimBasicPlusAccountCommand;
+import it.mathanalisys.generator.commands.reclaim.ReclaimBasicPlusPlusAccountCommand;
+import it.mathanalisys.generator.commands.StockAccountCommand;
+import it.mathanalisys.generator.listener.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
-import net.dv8tion.jda.internal.utils.Checks;
 import org.bson.Document;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -32,10 +31,11 @@ public class Generator {
     @Getter(AccessLevel.PUBLIC) private static Generator instance;
     @Getter(AccessLevel.PUBLIC) private DatabaseManager databaseManager;
 
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    @Getter private final ScheduledExecutorService remove_cooldown_thread = Executors.newScheduledThreadPool(1);
 
 
-    protected String TOKEN = "MTE0OTE5MTc1NzkwNTU0MzE4OA.Gr3Gzh.329B2RUzGKUurOHdDckpfgg75NuWZ_jwWly1xk";
+
+    protected String TOKEN = "MTE0OTI4NTA1NjU2OTk0NjIzMg.GieHDo.7IaPLkH5el7LknLuQkexLL2xiRtWX8Ub7fcPXQ";
 
     public Generator(){
         instance = this;
@@ -47,8 +47,7 @@ public class Generator {
 
     private void loadManager(){
         databaseManager = new DatabaseManager();
-        removeExpiredCooldowns();
-        scheduler.scheduleAtFixedRate(this::removeExpiredCooldowns, 1, 1, TimeUnit.HOURS);
+        remove_cooldown_thread.scheduleAtFixedRate(this::removeExpiredCooldowns, 1, 15, TimeUnit.MINUTES);
     }
 
     @SneakyThrows
@@ -64,6 +63,7 @@ public class Generator {
 
     private void loadListener(){
         jda.addEventListener(new ShutdownListener());
+        jda.addEventListener(new StockAccountCommand());
 
         // TODO: System for account
         jda.addEventListener(new ChannelMessageListener());
@@ -77,6 +77,12 @@ public class Generator {
         jda.addEventListener(new ReclaimBasicPlusPlusAccountCommand());
         //end
 
+
+        Guild guild = jda.getGuildById("1146820473892638791");
+        if (guild == null)return;
+        jda.upsertCommand("stock", "shows the availability of everything").queue();
+
+
     }
 
     public boolean hasRoleOrHigher(Member member, Role targetRole) {
@@ -87,22 +93,33 @@ public class Generator {
 
         for (Role role : memberRoles) {
             if (guildRoles.indexOf(role) <= targetIndex) {
-                return true;
+                return false;
             }
         }
 
-        return false;
+        return true;
     }
 
     private void removeExpiredCooldowns() {
         long currentTimestamp = System.currentTimeMillis();
         Document query = new Document("expiryTimestamp", new Document("$lt", currentTimestamp));
+
+        // Contiamo quanti cooldown scaduti ci sono prima di eliminarli
+        long count = Generator.get().getDatabaseManager().getCooldowns().countDocuments(query);
+        System.out.println("Trovati " + count + " cooldown scaduti.");
+
         Generator.get().getDatabaseManager().getCooldowns().deleteMany(query);
+
+        // Contiamo quanti cooldown scaduti ci sono dopo averli eliminati
+        long countAfterDelete = Generator.get().getDatabaseManager().getCooldowns().countDocuments(query);
+        System.out.println("Dopo la rimozione, rimangono " + countAfterDelete + " cooldown scaduti.");
     }
 
     public static Generator get() {
         return instance;
     }
+
+
 
 
 }

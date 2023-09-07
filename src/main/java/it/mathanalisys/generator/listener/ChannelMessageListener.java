@@ -11,7 +11,6 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -25,12 +24,12 @@ public class ChannelMessageListener extends ListenerAdapter {
         if (member == null) return;
 
 
-        if (event.getChannel().getId().equals("1149215610333577229") && !event.getMessage().getAttachments().isEmpty()) {
+        if (event.getChannel().getId().equals("1149294603284000809") && !event.getMessage().getAttachments().isEmpty()) {
             Generator.get().getDatabaseManager().getFiles().drop();
 
 
             Role role = event.getGuild().getRoleById("1149214454844772372");
-            if (!Generator.get().hasRoleOrHigher(member, role)) return;
+            if (Generator.get().hasRoleOrHigher(member, role)) return;
 
             event.getMessage().getAttachments().forEach(attachment -> attachment.retrieveInputStream().thenAccept(stream -> basic_data.submit(() -> {
                 List<Document> docsToInsert = new ArrayList<>();

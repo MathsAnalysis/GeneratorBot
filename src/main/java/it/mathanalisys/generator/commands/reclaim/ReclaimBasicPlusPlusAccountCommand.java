@@ -1,4 +1,4 @@
-package it.mathanalisys.generator.commands;
+package it.mathanalisys.generator.commands.reclaim;
 
 import it.mathanalisys.generator.Generator;
 import it.mathanalisys.generator.utils.DateUtils;
@@ -14,7 +14,6 @@ import org.bson.Document;
 import java.awt.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 public class ReclaimBasicPlusPlusAccountCommand extends ListenerAdapter {
@@ -38,19 +37,19 @@ public class ReclaimBasicPlusPlusAccountCommand extends ListenerAdapter {
 
                 Role targetRole = event.getGuild().getRoleById("1149189860612120596");
 
-                if (!Generator.get().hasRoleOrHigher(member, targetRole)) {
+                if (Generator.get().hasRoleOrHigher(member, targetRole)) {
                     user.openPrivateChannel().queue(privateChannel -> {
                         EmbedBuilder builder = new EmbedBuilder();
                         builder.setColor(Color.red);
                         builder.appendDescription("(✘) You don't have the required role to use this command.");
-                        privateChannel.sendMessageEmbeds(builder.build()).queue(sentMessage -> {
-                            sentMessage.delete().queueAfter(10, TimeUnit.SECONDS);
-                        }, throwable -> {
+                        privateChannel.sendMessageEmbeds(builder.build()).queue(sentMessage ->
+                                sentMessage.delete().queueAfter(10, TimeUnit.SECONDS), throwable -> {
                             if (throwable instanceof ErrorResponseException) {
                                 event.getChannel().sendMessage(user.getAsMention() + " I can't send you a private message. Please make sure your DMs are open.").queue();
                             }
                         });
                     });
+                    event.getMessage().delete().queueAfter(10, TimeUnit.SECONDS);
                     return;
                 }
 
@@ -88,7 +87,7 @@ public class ReclaimBasicPlusPlusAccountCommand extends ListenerAdapter {
                 });
 
                 event.getMessage().delete().queueAfter(5, TimeUnit.SECONDS);
-                Generator.get().getDatabaseManager().addCooldown(user.getId(), 10800, "basic_plus_plus_cooldown");
+                Generator.get().getDatabaseManager().addCooldown(user.getId(), 10800, user.getName(), "basic_plus_plus_cooldown");
             }
         }
     }
