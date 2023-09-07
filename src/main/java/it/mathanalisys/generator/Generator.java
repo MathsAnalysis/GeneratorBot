@@ -6,6 +6,7 @@ import it.mathanalisys.generator.commands.reclaim.ReclaimBasicPlusAccountCommand
 import it.mathanalisys.generator.commands.reclaim.ReclaimBasicPlusPlusAccountCommand;
 import it.mathanalisys.generator.commands.StockAccountCommand;
 import it.mathanalisys.generator.listener.*;
+import it.mathanalisys.generator.utils.Utility;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -47,7 +48,7 @@ public class Generator {
 
     private void loadManager(){
         databaseManager = new DatabaseManager();
-        remove_cooldown_thread.scheduleAtFixedRate(this::removeExpiredCooldowns, 1, 15, TimeUnit.MINUTES);
+        remove_cooldown_thread.scheduleAtFixedRate(Utility::removeExpiredCooldowns, 1, 15, TimeUnit.MINUTES);
     }
 
     @SneakyThrows
@@ -83,36 +84,6 @@ public class Generator {
         jda.upsertCommand("stock", "shows the availability of everything").queue();
 
 
-    }
-
-    public boolean hasRoleOrHigher(Member member, Role targetRole) {
-        List<Role> memberRoles = member.getRoles();
-
-        List<Role> guildRoles = member.getGuild().getRoles();
-        int targetIndex = guildRoles.indexOf(targetRole);
-
-        for (Role role : memberRoles) {
-            if (guildRoles.indexOf(role) <= targetIndex) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private void removeExpiredCooldowns() {
-        long currentTimestamp = System.currentTimeMillis();
-        Document query = new Document("expiryTimestamp", new Document("$lt", currentTimestamp));
-
-        // Contiamo quanti cooldown scaduti ci sono prima di eliminarli
-        long count = Generator.get().getDatabaseManager().getCooldowns().countDocuments(query);
-        System.out.println("Trovati " + count + " cooldown scaduti.");
-
-        Generator.get().getDatabaseManager().getCooldowns().deleteMany(query);
-
-        // Contiamo quanti cooldown scaduti ci sono dopo averli eliminati
-        long countAfterDelete = Generator.get().getDatabaseManager().getCooldowns().countDocuments(query);
-        System.out.println("Dopo la rimozione, rimangono " + countAfterDelete + " cooldown scaduti.");
     }
 
     public static Generator get() {

@@ -2,6 +2,7 @@ package it.mathanalisys.generator.commands.reclaim;
 
 import it.mathanalisys.generator.Generator;
 import it.mathanalisys.generator.utils.DateUtils;
+import it.mathanalisys.generator.utils.Utility;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
@@ -40,14 +41,14 @@ public class ReclaimBasicPlusAccountCommand extends ListenerAdapter {
 
                 Role targetRole = event.getGuild().getRoleById("1149189658761240599");
 
-                if (Generator.get().hasRoleOrHigher(member, targetRole)) {
+                if (Utility.hasRoleOrHigher(member, targetRole)) {
                     user.openPrivateChannel().queue(privateChannel -> {
                         EmbedBuilder builder = new EmbedBuilder();
                         builder.setColor(Color.red);
                         builder.appendDescription("(✘) You don't have the required role to use this command.");
                         privateChannel.sendMessageEmbeds(builder.build()).queue(sentMessage -> sentMessage.delete().queueAfter(10, TimeUnit.SECONDS), throwable -> {
                             if (throwable instanceof ErrorResponseException) {
-                                event.getChannel().sendMessage(user.getAsMention() + " I can't send you a private message. Please make sure your DMs are open.").queue();
+                                event.getChannel().sendMessage(user.getAsMention() + " I can't send you a private message. Please make sure your DMs are open.").queue(message1 -> message1.delete().queueAfter(10, TimeUnit.SECONDS));
                             }
                         });
                     });
@@ -58,12 +59,13 @@ public class ReclaimBasicPlusAccountCommand extends ListenerAdapter {
 
                 if (Generator.get().getDatabaseManager().isInCooldown(user.getId(), "basic_plus_cooldown")) {
                     int remainingSeconds = Generator.get().getDatabaseManager().getRemainingCooldown(user.getId(), "basic_plus_cooldown");
-                    event.getChannel().sendMessage("You must wait " + DateUtils.niceTime(remainingSeconds) + " before using this command again.").queue();
+                    event.getChannel().sendMessage("You must wait " + DateUtils.niceTime(remainingSeconds) + " before using this command again.").queue(message1 -> message1.delete().queueAfter(10, TimeUnit.SECONDS));
+                    event.getMessage().delete().queueAfter(10, TimeUnit.SECONDS);
                     return;
                 }
 
                 if (document == null) {
-                    event.getChannel().sendMessage("I'm sorry, there are no accounts available at the moment.").queue();
+                    event.getChannel().sendMessage("I'm sorry, there are no accounts available at the moment.").queue(message1 -> message1.delete().queueAfter(10, TimeUnit.SECONDS));
                     return;
                 }
 
@@ -83,7 +85,7 @@ public class ReclaimBasicPlusAccountCommand extends ListenerAdapter {
 
                     privateChannel.sendMessageEmbeds(builder.build()).queue(null, throwable -> {
                         if (throwable instanceof ErrorResponseException) {
-                            event.getChannel().sendMessage(user.getAsMention() + " I can't send you a private message. Please make sure your DMs are open.").queue();
+                            event.getChannel().sendMessage(user.getAsMention() + " I can't send you a private message. Please make sure your DMs are open.").queue(message1 -> message1.delete().queueAfter(10, TimeUnit.SECONDS));
                         }
                     });
                 });

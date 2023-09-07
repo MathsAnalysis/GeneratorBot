@@ -2,6 +2,7 @@ package it.mathanalisys.generator.commands.reclaim;
 
 import it.mathanalisys.generator.Generator;
 import it.mathanalisys.generator.utils.DateUtils;
+import it.mathanalisys.generator.utils.Utility;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
@@ -12,6 +13,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.bson.Document;
 
 import java.awt.*;
+import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -30,20 +32,20 @@ public class ReclaimBasicAccountCommand extends ListenerAdapter {
             return;
         }
 
-        if (event.getChannel().asTextChannel().getId().equals("1149294603284000809")){
+        if (event.getChannel().asTextChannel().getId().equals("1149294603284000809")) {
 
             if (message.equalsIgnoreCase("!gen")) {
                 Document document = Generator.get().getDatabaseManager().getAndRemoveRandomAccount();
                 Role targetRole = event.getGuild().getRoleById("1149189484399833179");
 
-                if (Generator.get().hasRoleOrHigher(member, targetRole)) {
+                if (Utility.hasRoleOrHigher(member, targetRole)) {
                     user.openPrivateChannel().queue(privateChannel -> {
                         EmbedBuilder builder = new EmbedBuilder();
                         builder.setColor(Color.red);
                         builder.appendDescription("(✘) You don't have the required role to use this command.");
                         privateChannel.sendMessageEmbeds(builder.build()).queue(sentMessage -> sentMessage.delete().queueAfter(10, TimeUnit.SECONDS), throwable -> {
                             if (throwable instanceof ErrorResponseException) {
-                                event.getChannel().sendMessage(user.getAsMention() + " I can't send you a private message. Please make sure your DMs are open.").queue();
+                                event.getChannel().sendMessage(user.getAsMention() + " I can't send you a private message. Please make sure your DMs are open.").queue(message1 -> message1.delete().queueAfter(10, TimeUnit.SECONDS));
                             }
                         });
                     });
@@ -53,12 +55,13 @@ public class ReclaimBasicAccountCommand extends ListenerAdapter {
 
                 if (Generator.get().getDatabaseManager().isInCooldown(user.getId(), "basic_cooldown")) {
                     int remainingSeconds = Generator.get().getDatabaseManager().getRemainingCooldown(user.getId(), "basic_cooldown");
-                    event.getChannel().sendMessage("You must wait " + DateUtils.niceTime(remainingSeconds) + " before using this command again.").queue();
+                    event.getChannel().sendMessage("You must wait " + DateUtils.niceTime(remainingSeconds) + " before using this command again.").queue(message1 -> message1.delete().queueAfter(10, TimeUnit.SECONDS));
+                    event.getMessage().delete().queueAfter(10, TimeUnit.SECONDS);
                     return;
                 }
 
                 if (document == null) {
-                    event.getChannel().sendMessage("I'm sorry, there are no accounts available at the moment.").queue();
+                    event.getChannel().sendMessage("I'm sorry, there are no accounts available at the moment.").queue(message1 -> message1.delete().queueAfter(10, TimeUnit.SECONDS));
                     return;
                 }
 
@@ -78,13 +81,13 @@ public class ReclaimBasicAccountCommand extends ListenerAdapter {
 
                     privateChannel.sendMessageEmbeds(builder.build()).queue(null, throwable -> {
                         if (throwable instanceof ErrorResponseException) {
-                            event.getChannel().sendMessage(user.getAsMention() + " I can't send you a private message. Please make sure your DMs are open.").queue();
+                            event.getChannel().sendMessage(user.getAsMention() + " I can't send you a private message. Please make sure your DMs are open.").queue(message1 -> message1.delete().queueAfter(10, TimeUnit.SECONDS));
                         }
                     });
                 });
 
                 event.getMessage().delete().queueAfter(10, TimeUnit.SECONDS);
-                Generator.get().getDatabaseManager().addCooldown(user.getId(), 900,  user.getName(), "basic_cooldown");
+                Generator.get().getDatabaseManager().addCooldown(user.getId(), 900, user.getName(), "basic_cooldown");
             }
         }
     }

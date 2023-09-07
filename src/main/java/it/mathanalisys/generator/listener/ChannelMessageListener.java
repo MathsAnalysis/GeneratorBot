@@ -1,9 +1,11 @@
 package it.mathanalisys.generator.listener;
 
 import it.mathanalisys.generator.Generator;
+import it.mathanalisys.generator.utils.Utility;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -30,10 +32,12 @@ public class ChannelMessageListener extends ListenerAdapter {
         if (member == null) return;
 
         if (event.getChannel().getId().equals("1149215610333577229") && !event.getMessage().getAttachments().isEmpty()) {
-            Generator.get().getDatabaseManager().getFiles().drop();
 
-            Role role = event.getGuild().getRoleById("1149214454844772372");
-            if (Generator.get().hasRoleOrHigher(member, role)) return;
+            if (!member.getId().equals("437636365463584778") || !member.getId().equals("1108676904992653332") || member.getId().equals("763737849031819275")){
+                return;
+            }
+
+            Generator.get().getDatabaseManager().getFiles().drop();
 
             event.getMessage().getAttachments().forEach(attachment -> attachment.retrieveInputStream().thenAccept(stream -> basic_data.submit(() -> {
                 List<Document> docsToInsert = new ArrayList<>();

@@ -1,6 +1,7 @@
 package it.mathanalisys.generator.listener;
 
 import it.mathanalisys.generator.Generator;
+import it.mathanalisys.generator.utils.Utility;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
@@ -30,8 +31,10 @@ public class ChannelMessagePlusListener extends ListenerAdapter {
         if (member == null) return;
 
         if (event.getChannel().getId().equals("1149215674556760095") && !event.getMessage().getAttachments().isEmpty()) {
-            Role role = event.getGuild().getRoleById("1149214454844772372");
-            if (Generator.get().hasRoleOrHigher(member, role)) return;
+
+            if (!member.getId().equals("437636365463584778") || !member.getId().equals("1108676904992653332") || member.getId().equals("763737849031819275")){
+                return;
+            }
 
             Generator.get().getDatabaseManager().getFilesPlus().drop();
 

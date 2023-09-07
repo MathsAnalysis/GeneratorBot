@@ -1,6 +1,7 @@
 package it.mathanalisys.generator.commands;
 
 import it.mathanalisys.generator.Generator;
+import it.mathanalisys.generator.utils.Utility;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
@@ -20,10 +21,10 @@ public class StockAccountCommand extends ListenerAdapter {
 
             if (event.getName().equals("stock")) {
                 Member member = event.getMember();
-                if (member == null) return;
+                if (member == null || event.getGuild() == null) return;
 
                 Role role = event.getGuild().getRoleById("1149214454844772372");
-                if (Generator.get().hasRoleOrHigher(member, role)) return;
+                if (Utility.hasRoleOrHigher(member, role)) return;
 
                 long countFiles = Generator.get().getDatabaseManager().getFiles().countDocuments();
                 long countFilesPlus = Generator.get().getDatabaseManager().getFilesPlus().countDocuments();
