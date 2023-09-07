@@ -71,7 +71,6 @@ public class Generator {
                 .setActivity(Activity.of(Activity.ActivityType.PLAYING, "Generating Account"))
                 .build()
                 .awaitReady();
-        
     }
 
     private void loadListener(){
