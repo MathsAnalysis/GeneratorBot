@@ -79,35 +79,20 @@ public class Generator {
 
     }
 
-    // TODO: 07/09/2023 System for role
-    public Role getHighestRoleFrom(Member member) {
-        Checks.notNull(member, "Member object can not be null");
-        List<Role> roles = member.getRoles();
-        if (roles.isEmpty()) {
-            return null;
-        }
-        return roles.stream().min((first, second) -> {
-            if (first.getPosition() == second.getPosition()) {
-                return 0;
+    public boolean hasRoleOrHigher(Member member, Role targetRole) {
+        List<Role> memberRoles = member.getRoles();
+
+        List<Role> guildRoles = member.getGuild().getRoles();
+        int targetIndex = guildRoles.indexOf(targetRole);
+
+        for (Role role : memberRoles) {
+            if (guildRoles.indexOf(role) <= targetIndex) {
+                return true;
             }
-            return first.getPosition() > second.getPosition() ? -1 : 1;
-        }).get();
+        }
+
+        return false;
     }
-
-    public boolean roleStartsWith(Member member, String roleName) {
-        return member.getRoles().stream().filter(role -> role.getName().startsWith(roleName)).findFirst().orElse(null) != null;
-    }
-
-    public boolean hasRoleByName(Member member, String roleName) {
-        return member.getRoles().stream().filter(role -> role.getName().equalsIgnoreCase(roleName)).findFirst().orElse(null) == null;
-    }
-
-
-    public boolean hasRoleById(Member member, String roleName) {
-        return member.getRoles().stream().filter(role -> role.getId().equalsIgnoreCase(roleName)).findFirst().orElse(null) != null;
-    }
-
-    //end
 
     private void removeExpiredCooldowns() {
         long currentTimestamp = System.currentTimeMillis();
