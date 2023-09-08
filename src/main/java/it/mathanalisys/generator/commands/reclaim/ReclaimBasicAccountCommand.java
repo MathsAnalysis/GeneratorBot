@@ -86,7 +86,6 @@ public class ReclaimBasicAccountCommand extends ListenerAdapter {
                     });
                 });
 
-                event.getMessage().delete().queueAfter(10, TimeUnit.SECONDS);
                 Generator.get().getDatabaseManager().addCooldown(user.getId(), 900, user.getName(), "basic_cooldown");
             }
         }

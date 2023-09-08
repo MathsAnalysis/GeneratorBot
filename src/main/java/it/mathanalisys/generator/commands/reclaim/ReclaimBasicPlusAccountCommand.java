@@ -90,7 +90,6 @@ public class ReclaimBasicPlusAccountCommand extends ListenerAdapter {
                     });
                 });
 
-                event.getMessage().delete().queueAfter(10, TimeUnit.SECONDS);
                 Generator.get().getDatabaseManager().addCooldown(user.getId(), 3600,  user.getName(), "basic_plus_cooldown");
             }
         }

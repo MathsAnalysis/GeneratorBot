@@ -8,11 +8,16 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import org.bson.Document;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 @UtilityClass
 public class Utility {
+
+    private static final Random random = new Random();
+
 
     public static boolean isUser(User user, String id){
         return user.getId().equals(id);
@@ -44,6 +49,13 @@ public class Utility {
 
         long countAfterDelete = Generator.get().getDatabaseManager().getCooldowns().countDocuments(query);
         System.out.println("Dopo la rimozione, rimangono " + countAfterDelete + " cooldown scaduti.");
+    }
+
+    public static Color randomColor() {
+        int red = random.nextInt(256);
+        int green = random.nextInt(256);
+        int blue = random.nextInt(256);
+        return new Color(red, green, blue);
     }
 
 }

@@ -1,6 +1,8 @@
 package it.mathanalisys.generator;
 
 import it.mathanalisys.generator.backend.DatabaseManager;
+import it.mathanalisys.generator.commands.CheckCooldownCommand;
+import it.mathanalisys.generator.commands.ResetCommand;
 import it.mathanalisys.generator.commands.reclaim.ReclaimBasicAccountCommand;
 import it.mathanalisys.generator.commands.reclaim.ReclaimBasicPlusAccountCommand;
 import it.mathanalisys.generator.commands.reclaim.ReclaimBasicPlusPlusAccountCommand;
@@ -78,6 +80,8 @@ public class Generator {
 
         // System for moderation
         jda.addEventListener(new StockAccountCommand());
+        jda.addEventListener(new ResetCommand());
+        jda.addEventListener(new CheckCooldownCommand());
 
         // System for account
         jda.addEventListener(new ChannelMessageListener());

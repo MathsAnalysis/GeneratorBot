@@ -32,7 +32,7 @@ public class ReclaimBasicPlusPlusAccountCommand extends ListenerAdapter {
             return;
         }
 
-        if (event.getChannel().asTextChannel().getId().equals("1149215591232720946")){
+        if (event.getChannel().asTextChannel().getId().equals("1149229752637456426")){
             if (message.equalsIgnoreCase("!gen")) {
                 Document document = Generator.get().getDatabaseManager().getAndRemoveAccountPlusPlus();
 
@@ -88,7 +88,6 @@ public class ReclaimBasicPlusPlusAccountCommand extends ListenerAdapter {
                     });
                 });
 
-                event.getMessage().delete().queueAfter(5, TimeUnit.SECONDS);
                 Generator.get().getDatabaseManager().addCooldown(user.getId(), 10800, user.getName(), "basic_plus_plus_cooldown");
             }
         }
