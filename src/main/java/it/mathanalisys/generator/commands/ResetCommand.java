@@ -75,7 +75,6 @@ public class ResetCommand extends ListenerAdapter {
                 builder.setColor(Utility.randomColor());
                 builder.appendDescription(new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date()));
                 event.getChannel().asTextChannel().sendMessageEmbeds(builder.build()).queue();
-
             } else {
                 event.getChannel().sendMessage("Usage: !reset <id_utente> <cooldown>").queue();
             }

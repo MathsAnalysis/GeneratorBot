@@ -60,7 +60,6 @@ public class Generator {
         this.commandDeletion = new CommandDeletion(jda);
         this.commandDeletion.deleteCommand("clear");
         this.commandDeletion.deleteCommand("clearchat");
-
     }
 
     @SneakyThrows

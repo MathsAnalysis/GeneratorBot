@@ -41,14 +41,7 @@ public class Utility {
     public static void removeExpiredCooldowns() {
         long currentTimestamp = System.currentTimeMillis();
         Document query = new Document("expiryTimestamp", new Document("$lt", currentTimestamp));
-
-        long count = Generator.get().getDatabaseManager().getCooldowns().countDocuments(query);
-        System.out.println("Trovati " + count + " cooldown scaduti.");
-
         Generator.get().getDatabaseManager().getCooldowns().deleteMany(query);
-
-        long countAfterDelete = Generator.get().getDatabaseManager().getCooldowns().countDocuments(query);
-        System.out.println("Dopo la rimozione, rimangono " + countAfterDelete + " cooldown scaduti.");
     }
 
     public static Color randomColor() {

@@ -69,6 +69,11 @@ public class ReclaimBasicPlusAccountCommand extends ListenerAdapter {
                     return;
                 }
 
+                event.getChannel()
+                        .asTextChannel()
+                        .sendMessage(user.getAsMention() + " Your account has been sent to your DMs.")
+                        .queue();
+
                 user.openPrivateChannel().queue(privateChannel -> {
                     EmbedBuilder builder = new EmbedBuilder();
                     builder.setTitle("Account");
