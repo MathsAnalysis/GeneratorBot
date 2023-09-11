@@ -1,18 +1,18 @@
 package it.mathanalisys.generator.backend;
 
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientOptions;
+import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Aggregates;
+import it.mathanalisys.generator.Generator;
 import lombok.Data;
 import lombok.SneakyThrows;
 import org.bson.Document;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 @Data
@@ -20,17 +20,37 @@ public class DatabaseManager {
 
     private MongoClient client;
     private MongoDatabase database;
+    private MongoCredential credential;
+
     private MongoCollection<Document>
             files, filesPlus, filesPlusPlus, cooldowns;
 
 
-    private static final String DB_NAME = "account";
-
-
     @SneakyThrows
     public DatabaseManager(){
-        this.client = new MongoClient(new ServerAddress("localhost", 27017));
-        this.database = client.getDatabase(DB_NAME);
+        boolean authEnabled = Generator.get().getConfiguration().getBoolean("MONGO-AUTHENTICATION-ENABLED");
+
+        if (authEnabled){
+            credential = MongoCredential.createCredential(
+                    Generator.get().getConfiguration().getString("MONGO-AUTHENTICATION-USERNAME"),
+                    Generator.get().getConfiguration().getString("MONGO-AUTHENTICATION-DATABASE"),
+                    Generator.get().getConfiguration().getString("MONGO-AUTHENTICATION-PASSWORD").toCharArray()
+            );
+            client = new MongoClient(new ServerAddress(
+                    Generator.get().getConfiguration().getString("MONGO-HOST"),
+                    Generator.get().getConfiguration().getInt("MONGO-PORT")
+            ), credential, MongoClientOptions.builder().build());
+            System.out.println("MongoDB connected with authentication");
+        }else {
+            client = new MongoClient(new ServerAddress(
+                    Generator.get().getConfiguration().getString("MONGO-HOST"),
+                    Generator.get().getConfiguration().getInt("MONGO-PORT")
+            ));
+            System.out.println("MongoDB is connected! \nWe recommend that you use the authentication!");
+        }
+
+
+        this.database = client.getDatabase(Generator.get().getConfiguration().getString("MONGO-DATABASE"));
         this.files = database.getCollection("basic");
         this.filesPlus = database.getCollection("basic_plus");
         this.filesPlusPlus = database.getCollection("basic_plus_plus");
@@ -60,9 +80,7 @@ public class DatabaseManager {
         }
 
         Document randomAccount = randomAccounts.get(0);
-
         filesPlus.deleteOne(new Document("_id", randomAccount.getObjectId("_id")));
-
         return randomAccount;
     }
 
@@ -79,8 +97,6 @@ public class DatabaseManager {
         return randomAccount;
     }
 
-
-    // TODO: 07/09/2023 System to add cooldowns to users
 
     public void addCooldown(String userId, int durationInSeconds, String name, String type) {
         long expiryTimestamp = System.currentTimeMillis() + (durationInSeconds * 1000L);

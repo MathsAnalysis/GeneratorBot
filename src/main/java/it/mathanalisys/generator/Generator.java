@@ -3,11 +3,15 @@ package it.mathanalisys.generator;
 import it.mathanalisys.generator.backend.DatabaseManager;
 import it.mathanalisys.generator.commands.CheckCooldownCommand;
 import it.mathanalisys.generator.commands.ResetCommand;
+import it.mathanalisys.generator.commands.StockAccountCommand;
 import it.mathanalisys.generator.commands.reclaim.ReclaimBasicAccountCommand;
 import it.mathanalisys.generator.commands.reclaim.ReclaimBasicPlusAccountCommand;
 import it.mathanalisys.generator.commands.reclaim.ReclaimBasicPlusPlusAccountCommand;
-import it.mathanalisys.generator.commands.StockAccountCommand;
-import it.mathanalisys.generator.listener.*;
+import it.mathanalisys.generator.config.Configuration;
+import it.mathanalisys.generator.listener.ChannelMessageListener;
+import it.mathanalisys.generator.listener.ChannelMessagePlusListener;
+import it.mathanalisys.generator.listener.ChannelMessagePlusPlusListener;
+import it.mathanalisys.generator.listener.ShutdownListener;
 import it.mathanalisys.generator.utils.CommandDeletion;
 import it.mathanalisys.generator.utils.Utility;
 import lombok.AccessLevel;
@@ -18,7 +22,6 @@ import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 
@@ -28,16 +31,18 @@ import java.util.concurrent.TimeUnit;
 
 public class Generator {
 
-    @Getter(AccessLevel.PUBLIC) private JDA jda;
     @Getter(AccessLevel.PUBLIC) private static Generator instance;
     @Getter(AccessLevel.PUBLIC) private DatabaseManager databaseManager;
+    @Getter(AccessLevel.PUBLIC) private Configuration configuration;
+
+    @Getter(AccessLevel.PUBLIC) private JDA jda;
 
     @Getter private final ScheduledExecutorService remove_cooldown_thread = Executors.newScheduledThreadPool(1);
-
 
     public static Guild GUILD_ID;
 
     protected CommandDeletion commandDeletion;
+
 
 
 
@@ -52,6 +57,7 @@ public class Generator {
     }
 
     private void loadManager(){
+        this.configuration = new Configuration("configuration");
         databaseManager = new DatabaseManager();
         remove_cooldown_thread.scheduleAtFixedRate(Utility::removeExpiredCooldowns, 1, 15, TimeUnit.MINUTES);
 
