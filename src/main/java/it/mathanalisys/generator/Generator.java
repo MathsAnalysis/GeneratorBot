@@ -46,7 +46,7 @@ public class Generator {
 
 
 
-    protected String TOKEN = "MTE0OTI4NTA1NjU2OTk0NjIzMg.GieHDo.7IaPLkH5el7LknLuQkexLL2xiRtWX8Ub7fcPXQ";
+    protected String TOKEN = "";
 
     public Generator(){
         instance = this;
