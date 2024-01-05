@@ -61,7 +61,7 @@ public class Generator {
         databaseManager = new DatabaseManager();
         remove_cooldown_thread.scheduleAtFixedRate(Utility::removeExpiredCooldowns, 1, 15, TimeUnit.MINUTES);
 
-        GUILD_ID = jda.getGuildById("1146820473892638791");
+        GUILD_ID = jda.getGuildById("GUILD_ID_NUMBER");
 
         this.commandDeletion = new CommandDeletion(jda);
         this.commandDeletion.deleteCommand("clear");
